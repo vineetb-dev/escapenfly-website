@@ -225,6 +225,14 @@
   }
   @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
   .bubble.maya{ align-self:flex-start; background:#fff; border:1px solid var(--line); border-left:3px solid var(--gold); }
+  .verified-badge{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.5px;
+    color:var(--gold);
+    margin-top:8px;
+    opacity:0.85;
+  }
   .bubble.user{ align-self:flex-end; background:var(--ink); color:var(--paper); }
 
   .typing{
@@ -392,10 +400,16 @@
   const chatInput = document.getElementById('chatInput');
   const sendBtn = document.getElementById('sendBtn');
 
-  function addBubble(text, who){
+  function addBubble(text, who, verified){
     const b = document.createElement('div');
     b.className = 'bubble ' + who;
     b.textContent = text;
+    if(verified){
+      const badge = document.createElement('div');
+      badge.className = 'verified-badge';
+      badge.textContent = '✓ EscapeNFly verified';
+      b.appendChild(badge);
+    }
     chatWindow.appendChild(b);
     chatWindow.scrollTop = chatWindow.scrollHeight;
     return b;
@@ -457,7 +471,7 @@
       });
       const data = await res.json();
       hideTyping();
-      addBubble(data.reply || "Sorry, I didn't catch that — could you try again?", 'maya');
+      addBubble(data.reply || "Sorry, I didn't catch that — could you try again?", 'maya', data.founderVerified);
       if(data.sessionKey && data.sessionKey !== sessionKey){
         sessionKey = data.sessionKey;
         sessionStorage.setItem('enf_session', sessionKey);
