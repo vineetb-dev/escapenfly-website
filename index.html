@@ -297,6 +297,48 @@
   .barcode i{ display:block; width:2px; background:rgba(250,250,250,0.55); }
   .ticket-note{ font-size:12px; color:var(--cloud); margin-top:14px; max-width:34ch; line-height:1.5; }
 
+  .stamps-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .stamp-btn{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    background:#fff;
+    border:1.5px solid var(--oxblood);
+    color:var(--oxblood);
+    padding:8px 14px;
+    border-radius:3px;
+    cursor:pointer;
+    position:relative;
+    opacity:0;
+    animation:stampIn .4s ease forwards;
+    transition:background .15s ease, color .15s ease;
+  }
+  .stamp-btn::before{
+    content:''; position:absolute; inset:2px;
+    border:1px dashed var(--oxblood); border-radius:1px; opacity:0.5;
+  }
+  .stamp-btn:hover{ background:rgba(122,31,43,0.06); }
+  .stamp-btn.active{ background:var(--oxblood); color:#fff; }
+  .stamp-btn.active::before{ border-color:#fff; opacity:0.4; }
+  @keyframes stampIn{ from{ opacity:0; transform:scale(1.4) rotate(-6deg);} to{ opacity:1; transform:scale(1) rotate(-1.5deg);} }
+
+  .workspace-panel{
+    margin-top:14px;
+    background:var(--ink); color:var(--paper);
+    border-radius:6px;
+    padding:0;
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease, padding .35s ease;
+  }
+  .workspace-panel.open{ padding:20px 22px; max-height:600px; }
+  .workspace-panel .ws-eyebrow{ font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:10px; }
+  .workspace-panel .ws-row{ display:flex; gap:10px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.08); font-size:13.5px; line-height:1.6; }
+  .workspace-panel .ws-row:last-child{ border-bottom:none; }
+  .workspace-panel .ws-row b{ color:var(--gold); flex-shrink:0; font-size:11px; text-transform:uppercase; font-family:'Space Mono',monospace; width:100px; padding-top:2px; }
+  .workspace-panel .ws-row span{ color:#d8d8d8; }
+
   /* ---------- FOOTER ---------- */
   footer{
     background:var(--paper); border-top:1px solid var(--line);
@@ -374,6 +416,9 @@
           </div>
         </div>
         <p class="ticket-note">This fills in automatically as Maya learns about your trip — nothing's booked until our expert confirms with you directly.</p>
+
+        <div class="stamps-row" id="stampsRow"></div>
+        <div class="workspace-panel" id="workspacePanel"></div>
       </div>
     </div>
   </div>
@@ -486,6 +531,77 @@
     if(lead.name) setTicketValue('fieldName','valName', lead.name);
   }
 
+  // ── WORKSPACE — stamps navigate real founder-verified content ──
+  const STAMP_LABELS = { visa: 'Visa', flights: 'Flights', hotels: 'Hotels', budget: 'Budget', tips: 'Tips' };
+  let workspaceData = {};
+  let activeStamp = null;
+  const knownStamps = new Set();
+
+  function renderWorkspacePanel(key){
+    const panel = document.getElementById('workspacePanel');
+    const d = workspaceData[key];
+    if(!d){ panel.classList.remove('open'); return; }
+
+    let rows = '';
+    if(key === 'visa'){
+      if(d.summary) rows += `<div class="ws-row"><b>Visa</b><span>${d.summary}</span></div>`;
+      if(d.complexity) rows += `<div class="ws-row"><b>Complexity</b><span>${d.complexity}</span></div>`;
+    } else if(key === 'flights'){
+      if(d.airlines) rows += `<div class="ws-row"><b>Airlines</b><span>${d.airlines}</span></div>`;
+      rows += `<div class="ws-row"><b>Compare</b><span><a href="https://www.google.com/flights" target="_blank" rel="noopener" style="color:var(--gold);">Google Flights →</a></span></div>`;
+    } else if(key === 'hotels'){
+      if(d.areas) rows += `<div class="ws-row"><b>Best areas</b><span>${d.areas}</span></div>`;
+      if(d.luxuryUpgrade) rows += `<div class="ws-row"><b>Going premium</b><span>${d.luxuryUpgrade}</span></div>`;
+      rows += `<div class="ws-row"><b>Compare</b><span><a href="https://www.booking.com" target="_blank" rel="noopener" style="color:var(--gold);">Booking.com →</a></span></div>`;
+    } else if(key === 'budget'){
+      if(d.minBudgetInr) rows += `<div class="ws-row"><b>Realistic min</b><span>₹${Number(d.minBudgetInr).toLocaleString('en-IN')}${d.note ? ' — ' + d.note : ''}</span></div>`;
+      if(d.idealDuration) rows += `<div class="ws-row"><b>Ideal length</b><span>${d.idealDuration}</span></div>`;
+    } else if(key === 'tips'){
+      if(d.idealFor) rows += `<div class="ws-row"><b>Ideal for</b><span>${d.idealFor}</span></div>`;
+      if(d.avoidIf) rows += `<div class="ws-row"><b>Reconsider if</b><span>${d.avoidIf}</span></div>`;
+      if(d.mustNotMiss) rows += `<div class="ws-row"><b>Don't miss</b><span>${d.mustNotMiss}</span></div>`;
+      if(d.hiddenGem) rows += `<div class="ws-row"><b>Hidden gem</b><span>${d.hiddenGem}</span></div>`;
+      if(d.moneySavingTip) rows += `<div class="ws-row"><b>Save money</b><span>${d.moneySavingTip}</span></div>`;
+      if(d.commonMistakes) rows += `<div class="ws-row"><b>Avoid</b><span>${d.commonMistakes}</span></div>`;
+      if(d.firstTimeAdvice) rows += `<div class="ws-row"><b>First-timer</b><span>${d.firstTimeAdvice}</span></div>`;
+    }
+
+    panel.innerHTML = `<div class="ws-eyebrow">${STAMP_LABELS[key]} · EscapeNFly verified</div>${rows}`;
+    panel.classList.add('open');
+  }
+
+  function renderStamps(){
+    const row = document.getElementById('stampsRow');
+    Object.keys(STAMP_LABELS).forEach(key => {
+      if(workspaceData[key] && !knownStamps.has(key)){
+        knownStamps.add(key);
+        const btn = document.createElement('button');
+        btn.className = 'stamp-btn';
+        btn.textContent = STAMP_LABELS[key];
+        btn.addEventListener('click', () => {
+          if(activeStamp === key){
+            activeStamp = null;
+            document.querySelectorAll('.stamp-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('workspacePanel').classList.remove('open');
+          }else{
+            activeStamp = key;
+            document.querySelectorAll('.stamp-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderWorkspacePanel(key);
+          }
+        });
+        row.appendChild(btn);
+      }
+    });
+  }
+
+  function updateWorkspace(workspace){
+    if(!workspace) return;
+    workspaceData = workspace;
+    renderStamps();
+    if(activeStamp && workspaceData[activeStamp]) renderWorkspacePanel(activeStamp);
+  }
+
   let started = false;
   function revealPlanner(){
     if(started) return;
@@ -517,6 +633,7 @@
         sessionStorage.setItem('enf_session', sessionKey);
       }
       updateTicket(data.lead);
+      updateWorkspace(data.workspace);
     }catch(err){
       hideTyping();
       addBubble("Having trouble connecting right now — please try again in a moment, or call us directly at +91 98517 39851.", 'maya');
