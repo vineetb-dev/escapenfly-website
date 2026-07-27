@@ -537,6 +537,12 @@
   let activeStamp = null;
   const knownStamps = new Set();
 
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
   function renderWorkspacePanel(key){
     const panel = document.getElementById('workspacePanel');
     const d = workspaceData[key];
@@ -544,26 +550,26 @@
 
     let rows = '';
     if(key === 'visa'){
-      if(d.summary) rows += `<div class="ws-row"><b>Visa</b><span>${d.summary}</span></div>`;
-      if(d.complexity) rows += `<div class="ws-row"><b>Complexity</b><span>${d.complexity}</span></div>`;
+      if(d.summary) rows += `<div class="ws-row"><b>Visa</b><span>${escapeHtml(d.summary)}</span></div>`;
+      if(d.complexity) rows += `<div class="ws-row"><b>Complexity</b><span>${escapeHtml(d.complexity)}</span></div>`;
     } else if(key === 'flights'){
-      if(d.airlines) rows += `<div class="ws-row"><b>Airlines</b><span>${d.airlines}</span></div>`;
+      if(d.airlines) rows += `<div class="ws-row"><b>Airlines</b><span>${escapeHtml(d.airlines)}</span></div>`;
       rows += `<div class="ws-row"><b>Compare</b><span><a href="https://www.google.com/flights" target="_blank" rel="noopener" style="color:var(--gold);">Google Flights →</a></span></div>`;
     } else if(key === 'hotels'){
-      if(d.areas) rows += `<div class="ws-row"><b>Best areas</b><span>${d.areas}</span></div>`;
-      if(d.luxuryUpgrade) rows += `<div class="ws-row"><b>Going premium</b><span>${d.luxuryUpgrade}</span></div>`;
+      if(d.areas) rows += `<div class="ws-row"><b>Best areas</b><span>${escapeHtml(d.areas)}</span></div>`;
+      if(d.luxuryUpgrade) rows += `<div class="ws-row"><b>Going premium</b><span>${escapeHtml(d.luxuryUpgrade)}</span></div>`;
       rows += `<div class="ws-row"><b>Compare</b><span><a href="https://www.booking.com" target="_blank" rel="noopener" style="color:var(--gold);">Booking.com →</a></span></div>`;
     } else if(key === 'budget'){
-      if(d.minBudgetInr) rows += `<div class="ws-row"><b>Realistic min</b><span>₹${Number(d.minBudgetInr).toLocaleString('en-IN')}${d.note ? ' — ' + d.note : ''}</span></div>`;
-      if(d.idealDuration) rows += `<div class="ws-row"><b>Ideal length</b><span>${d.idealDuration}</span></div>`;
+      if(d.minBudgetInr) rows += `<div class="ws-row"><b>Realistic min</b><span>₹${escapeHtml(Number(d.minBudgetInr).toLocaleString('en-IN'))}${d.note ? ' — ' + escapeHtml(d.note) : ''}</span></div>`;
+      if(d.idealDuration) rows += `<div class="ws-row"><b>Ideal length</b><span>${escapeHtml(d.idealDuration)}</span></div>`;
     } else if(key === 'tips'){
-      if(d.idealFor) rows += `<div class="ws-row"><b>Ideal for</b><span>${d.idealFor}</span></div>`;
-      if(d.avoidIf) rows += `<div class="ws-row"><b>Reconsider if</b><span>${d.avoidIf}</span></div>`;
-      if(d.mustNotMiss) rows += `<div class="ws-row"><b>Don't miss</b><span>${d.mustNotMiss}</span></div>`;
-      if(d.hiddenGem) rows += `<div class="ws-row"><b>Hidden gem</b><span>${d.hiddenGem}</span></div>`;
-      if(d.moneySavingTip) rows += `<div class="ws-row"><b>Save money</b><span>${d.moneySavingTip}</span></div>`;
-      if(d.commonMistakes) rows += `<div class="ws-row"><b>Avoid</b><span>${d.commonMistakes}</span></div>`;
-      if(d.firstTimeAdvice) rows += `<div class="ws-row"><b>First-timer</b><span>${d.firstTimeAdvice}</span></div>`;
+      if(d.idealFor) rows += `<div class="ws-row"><b>Ideal for</b><span>${escapeHtml(d.idealFor)}</span></div>`;
+      if(d.avoidIf) rows += `<div class="ws-row"><b>Reconsider if</b><span>${escapeHtml(d.avoidIf)}</span></div>`;
+      if(d.mustNotMiss) rows += `<div class="ws-row"><b>Don't miss</b><span>${escapeHtml(d.mustNotMiss)}</span></div>`;
+      if(d.hiddenGem) rows += `<div class="ws-row"><b>Hidden gem</b><span>${escapeHtml(d.hiddenGem)}</span></div>`;
+      if(d.moneySavingTip) rows += `<div class="ws-row"><b>Save money</b><span>${escapeHtml(d.moneySavingTip)}</span></div>`;
+      if(d.commonMistakes) rows += `<div class="ws-row"><b>Avoid</b><span>${escapeHtml(d.commonMistakes)}</span></div>`;
+      if(d.firstTimeAdvice) rows += `<div class="ws-row"><b>First-timer</b><span>${escapeHtml(d.firstTimeAdvice)}</span></div>`;
     }
 
     panel.innerHTML = `<div class="ws-eyebrow">${STAMP_LABELS[key]} · EscapeNFly verified</div>${rows}`;
