@@ -262,6 +262,19 @@
     animation:rise .4s ease .1s both;
   }
   .ticket-top{ padding:20px 22px 16px; }
+  .ticket-photo{
+    height:0;
+    background-size:cover;
+    background-position:center;
+    transition:height .5s cubic-bezier(.2,.8,.2,1);
+    position:relative;
+  }
+  .ticket-photo.loaded{ height:150px; }
+  .ticket-photo::after{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,10,10,0) 40%, rgba(10,10,10,0.85) 100%);
+  }
   .ticket-top .airline{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
   .ticket-top .airline b{ font-size:14px; letter-spacing:1.5px; }
   .ticket-top .airline span{ font-family:'Space Mono',monospace; font-size:11px; color:var(--gold); letter-spacing:1px; }
@@ -339,6 +352,7 @@
     <div class="ticket-wrap">
       <div>
         <div class="ticket" id="ticket">
+          <div class="ticket-photo" id="ticketPhoto"></div>
           <div class="ticket-top">
             <div class="airline"><b>ESCAPENFLY</b><span>BOARDING PASS</span></div>
             <div class="ticket-route">
@@ -433,12 +447,38 @@
     val.classList.remove('placeholder');
     if(changed){ field.classList.remove('updated'); void field.offsetWidth; field.classList.add('updated'); }
   }
+  let lastPhotoDestination = '';
+  async function loadDestinationPhoto(destination){
+    if(!destination || destination === lastPhotoDestination) return;
+    lastPhotoDestination = destination;
+    const photoEl = document.getElementById('ticketPhoto');
+    try{
+      const title = encodeURIComponent(destination.split(',')[0].trim());
+      const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`);
+      if(!res.ok) return;
+      const data = await res.json();
+      const imgUrl = data.thumbnail?.source;
+      if(imgUrl){
+        // Preload before showing, so the reveal transition never shows a blank/broken frame
+        const img = new Image();
+        img.onload = () => {
+          photoEl.style.backgroundImage = `url("${imgUrl}")`;
+          photoEl.classList.add('loaded');
+        };
+        img.src = imgUrl;
+      }
+    }catch(err){
+      // Silent, graceful fallback — the photo band just stays collapsed, never a broken-image icon
+    }
+  }
+
   function updateTicket(lead){
     if(!lead) return;
     if(lead.destination){
       const d = document.getElementById('ticketDest');
       d.textContent = lead.destination.toUpperCase();
       d.classList.remove('placeholder');
+      loadDestinationPhoto(lead.destination);
     }
     if(lead.travelMonth) setTicketValue('fieldMonth','valMonth', lead.travelMonth);
     if(lead.pax) setTicketValue('fieldPax','valPax', lead.pax);
