@@ -553,11 +553,9 @@
       if(d.complexity) rows += `<div class="ws-row"><b>Complexity</b><span>${escapeHtml(d.complexity)}</span></div>`;
     } else if(key === 'flights'){
       if(d.airlines) rows += `<div class="ws-row"><b>Airlines</b><span>${escapeHtml(d.airlines)}</span></div>`;
-      rows += `<div class="ws-row"><b>Compare</b><span><a href="https://www.google.com/flights" target="_blank" rel="noopener" style="color:var(--gold);">Google Flights →</a></span></div>`;
     } else if(key === 'hotels'){
       if(d.areas) rows += `<div class="ws-row"><b>Best areas</b><span>${escapeHtml(d.areas)}</span></div>`;
       if(d.luxuryUpgrade) rows += `<div class="ws-row"><b>Going premium</b><span>${escapeHtml(d.luxuryUpgrade)}</span></div>`;
-      rows += `<div class="ws-row"><b>Compare</b><span><a href="https://www.booking.com" target="_blank" rel="noopener" style="color:var(--gold);">Booking.com →</a></span></div>`;
     } else if(key === 'budget'){
       if(d.minBudgetInr) rows += `<div class="ws-row"><b>Realistic min</b><span>₹${escapeHtml(Number(d.minBudgetInr).toLocaleString('en-IN'))}${d.note ? ' — ' + escapeHtml(d.note) : ''}</span></div>`;
       if(d.idealDuration) rows += `<div class="ws-row"><b>Ideal length</b><span>${escapeHtml(d.idealDuration)}</span></div>`;
