@@ -303,6 +303,19 @@
   .barcode{ display:flex; gap:2px; align-items:flex-end; height:28px; }
   .barcode i{ display:block; width:2px; background:rgba(250,250,250,0.55); }
   .ticket-note{ font-size:12px; color:var(--cloud); margin-top:14px; max-width:34ch; line-height:1.5; }
+  .whatsapp-btn{
+    display:flex; align-items:center; justify-content:center;
+    margin-top:16px;
+    background:#25D366;
+    color:#fff;
+    text-decoration:none;
+    font-weight:600;
+    font-size:14px;
+    padding:13px 20px;
+    border-radius:4px;
+    transition:opacity .15s ease;
+  }
+  .whatsapp-btn:hover{ opacity:0.9; }
 
   .stamps-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
   .stamp-btn{
@@ -427,6 +440,7 @@
 
         <div class="stamps-row" id="stampsRow"></div>
         <div class="workspace-panel" id="workspacePanel"></div>
+        <a href="#" id="whatsappContinue" class="whatsapp-btn" style="display:none;" target="_blank" rel="noopener">Continue on WhatsApp →</a>
       </div>
     </div>
   </div>
@@ -537,6 +551,24 @@
     if(lead.pax) setTicketValue('fieldPax','valPax', lead.pax);
     if(lead.budget) setTicketValue('fieldBudget','valBudget', lead.budget);
     if(lead.name) setTicketValue('fieldName','valName', lead.name);
+    updateWhatsAppLink(lead);
+  }
+
+  // Lets a visitor share their trip details to WhatsApp instead of typing a
+  // phone number into chat — the moment they hit send, their real WhatsApp
+  // number reaches us automatically via the existing WhatsApp webhook, no
+  // separate "what's your number" ask needed.
+  const ESCAPENFLY_WA_NUMBER = '919851739851';
+  function updateWhatsAppLink(lead){
+    const btn = document.getElementById('whatsappContinue');
+    if(!lead || !lead.destination){ btn.style.display = 'none'; return; }
+    let msg = `Hi! I was planning a trip to ${lead.destination}`;
+    if(lead.travelMonth) msg += ` in ${lead.travelMonth}`;
+    if(lead.pax) msg += ` for ${lead.pax}`;
+    if(lead.budget) msg += `, budget around ${lead.budget}`;
+    msg += `. Please send me the itinerary and details.`;
+    btn.href = `https://wa.me/${ESCAPENFLY_WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+    btn.style.display = 'flex';
   }
 
   // ── WORKSPACE — stamps navigate real founder-verified content ──
