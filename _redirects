@@ -1,0 +1,8 @@
+# Old indexed URLs from a previous site structure -> current real pages
+# Prevents visitors clicking stale Google results from hitting a 404
+/about-us              /about.html          301
+/privacy-policy        /privacy.html        301
+/terms-of-use          /terms.html          301
+# No current equivalent for these — send to homepage rather than a dead page
+/trip-details          /                    301
+/refund-policy          /                    301
